@@ -1,0 +1,9 @@
+<h1 class="mat-headline">Sunny Express</h1>
+<button mat-icon-button color="primary" (click)="drawer.toggle()"><mat-icon>control_point</mat-icon></button>
+
+<mat-drawer-container class="f01-container" autosize>
+  <mat-drawer #drawer class="example-sidenav" mode="side" opened>
+    <app-doc-tree></app-doc-tree>
+  </mat-drawer>
+  <mat-drawer-content>Main content</mat-drawer-content>
+</mat-drawer-container>
