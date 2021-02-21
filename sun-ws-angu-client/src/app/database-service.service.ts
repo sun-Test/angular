@@ -44,9 +44,7 @@ export class DatabaseService {
   /** The data */
   //= ['programming', 'life and study']
   rootLevelNodes: string[] = [];
-  dataMap = new Map<string, string[]>( [   
-    ['life and study', []], ['programming', []]
-    ]);//
+  dataMap = new Map<string, string[]>( );//
 
     //inject dependence
     constructor(private wsServiceService: WsServiceService) { 
@@ -57,24 +55,27 @@ export class DatabaseService {
         this.wsServiceService.emit(UPDATE_TREE_CHILDREN, 'getChildren');
       });
   
-      this.wsServiceService.listen(TREE_ROOT).subscribe((rootData: any) => {
-        console.log('get event: tree01 root');
-        console.log(rootData);
-        this.rootLevelNodes = rootData['root'];
-        const data = this.rootLevelNodes.map(name => this._generateNode(name));
-        this.dataChange.next(data);
-      });
-  
-      this.wsServiceService.listen(TREE_CHILDREN).subscribe((childrenData: any) => {
-        console.log('get event: tree01 children');
-        console.log(childrenData);
-        
-        this.dataMap = new Map<string, string[]>(childrenData['children']);
-      });
-    }
+       
+        }
     
   initialize() {
-
+      this.wsServiceService.listen(TREE_CHILDREN).subscribe((childrenData: any) => {
+              console.log('get event: tree01 children');
+              console.log(childrenData);
+              
+              this.dataMap = new Map<string, string[]>(childrenData['children']);
+              const data = this.rootLevelNodes.map(name => this._generateNode(name));
+              this.dataChange.next(data);
+          
+            });
+ 
+      this.wsServiceService.listen(TREE_ROOT).subscribe((rootData: any) => {
+            console.log('get event: tree01 root');
+            console.log(rootData);
+            this.rootLevelNodes = rootData['root'];
+          
+          });
+      
   }
 
   /** Expand a node whose children are not loaded */

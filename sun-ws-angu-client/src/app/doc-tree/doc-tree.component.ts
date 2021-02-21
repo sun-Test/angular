@@ -23,9 +23,6 @@ export class DocTreeComponent {
 
   constructor(private _database: DatabaseService) {
 
-
-    _database.initialize();
-
     this.treeFlattener = new MatTreeFlattener(this.transformer, this.getLevel,
       this.isExpandable, this.getChildren);
 
@@ -36,6 +33,8 @@ export class DocTreeComponent {
     _database.dataChange.subscribe(data => {
       this.dataSource.data = data;
     });
+    
+    _database.initialize();
   }
 
   getChildren = (node: LoadmoreNode): Observable<LoadmoreNode[]> => node.childrenChange;
@@ -46,8 +45,6 @@ export class DocTreeComponent {
     if (existingNode) {
       return existingNode;
     }
-    console.log("inspect node");
-    console.log(node);
     const newNode =
         new LoadmoreFlatNode(node.item, level, node.hasChildren, node.loadMoreParentItem);
     this.nodeMap.set(node.item, newNode);

@@ -15,7 +15,7 @@
           {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
         </mat-icon>
       </button>
-      {{node.item}}
+      <a>{{node.item}}</a>
     </mat-tree-node>
   
     <mat-tree-node *matTreeNodeDef="let node; when: isLoadMore">
