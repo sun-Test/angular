@@ -3,7 +3,7 @@ import { Component, Injectable, OnInit } from '@angular/core';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { DatabaseService, LoadmoreFlatNode, LoadmoreNode  } from '../database-service.service';
+import { DatabaseService, LoadmoreFlatNode, LoadmoreNode, NodeItem  } from '../database-service.service';
 
 const LOAD_MORE = 'LOAD_MORE';
 
@@ -15,7 +15,7 @@ const LOAD_MORE = 'LOAD_MORE';
 })
 export class DocTreeComponent {
 
-  nodeMap = new Map<string, LoadmoreFlatNode>();
+  nodeMap = new Map<NodeItem, LoadmoreFlatNode>();
   treeControl: FlatTreeControl<LoadmoreFlatNode>;
   treeFlattener: MatTreeFlattener<LoadmoreNode, LoadmoreFlatNode>;
   // Flat tree data source
@@ -57,15 +57,19 @@ export class DocTreeComponent {
 
   hasChild = (_: number, _nodeData: LoadmoreFlatNode) => _nodeData.expandable;
 
-  isLoadMore = (_: number, _nodeData: LoadmoreFlatNode) => _nodeData.item === LOAD_MORE;
+  isLoadMore = (_: number, _nodeData: LoadmoreFlatNode) => _nodeData.item.name === LOAD_MORE;
 
   /** Load more nodes from data source */
-  loadMore(item: string) {
+  loadMore(item: NodeItem) {
     this._database.loadMore(item);
   }
 
   loadChildren(node: LoadmoreFlatNode) {
     this._database.loadMore(node.item, true);
+  }
+
+  onClickNode(e: string) {
+    console.log('onClickNode' + e)
   }
 
 }

@@ -10,6 +10,11 @@ const TREE_ROOT = 'tree01 root';
 const TREE_CHILDREN = 'tree01 children';
 const WS_READY='wsReady';
 
+export class NodeItem {
+  constructor(public id: string,
+              public name: string){}
+}
+
 /** Nested node */
 export class LoadmoreNode {
   childrenChange = new BehaviorSubject<LoadmoreNode[]>([]);
@@ -18,17 +23,17 @@ export class LoadmoreNode {
     return this.childrenChange.value;
   }
 
-  constructor(public item: string,
+  constructor(public item: NodeItem,
               public hasChildren = false,
-              public loadMoreParentItem: string | null = null) {}
+              public loadMoreParentItem: NodeItem | null = null) {}
 }
 
 /** Flat node with expandable and level information */
 export class LoadmoreFlatNode {
-  constructor(public item: string,
+  constructor(public item: NodeItem,
               public level = 1,
               public expandable = false,
-              public loadMoreParentItem: string | null = null) {}
+              public loadMoreParentItem: NodeItem | null = null) {}
 }
 
 /**
@@ -39,12 +44,12 @@ export class LoadmoreFlatNode {
 export class DatabaseService {
   batchNumber = 5;
   dataChange = new BehaviorSubject<LoadmoreNode[]>([]);
-  nodeMap = new Map<string, LoadmoreNode>();
+  nodeMap = new Map<NodeItem, LoadmoreNode>();
 
   /** The data */
   //= ['programming', 'life and study']
-  rootLevelNodes: string[] = [];
-  dataMap = new Map<string, string[]>( );//
+  rootLevelNodes: NodeItem[] = [];
+  dataMap = new Map<string, NodeItem[]>( );//
 
     //inject dependence
     constructor(private wsServiceService: WsServiceService) { 
@@ -59,11 +64,14 @@ export class DatabaseService {
         }
     
   initialize() {
-      this.wsServiceService.listen(TREE_CHILDREN).subscribe((childrenData: any) => {
+      this.wsServiceService.listen(TREE_CHILDREN).subscribe((childrenData:any) => {
               console.log('get event: tree01 children');
               console.log(childrenData);
               
-              this.dataMap = new Map<string, string[]>(childrenData['children']);
+             let tmpMap = new Map<NodeItem, NodeItem[]>(childrenData['children']);
+              tmpMap.forEach((value, key) => {
+                this.dataMap.set(key.id, value);
+              });
               const data = this.rootLevelNodes.map(name => this._generateNode(name));
               this.dataChange.next(data);
           
@@ -79,13 +87,13 @@ export class DatabaseService {
   }
 
   /** Expand a node whose children are not loaded */
-  loadMore(item: string, onlyFirstTime = false) {
+  loadMore(item: NodeItem, onlyFirstTime = false) {
     //console.log(this.dataMap);
-    if (!this.nodeMap.has(item) || !this.dataMap.has(item)) {
+    if (!this.nodeMap.has(item) || !this.dataMap.has(item.id)) {
       return;
     }
     const parent = this.nodeMap.get(item)!;
-    const children = this.dataMap.get(item)!;
+    const children = this.dataMap.get(item.id)!;
     if (onlyFirstTime && parent.children!.length > 0) {
       return;
     }
@@ -94,18 +102,22 @@ export class DatabaseService {
       .map(name => this._generateNode(name));
     if (newChildrenNumber < children.length) {
       // Need a new load more node
-      nodes.push(new LoadmoreNode(LOAD_MORE, false, item));
+      nodes.push(new LoadmoreNode(new NodeItem(LOAD_MORE, ""), false, item));
     }
 
     parent.childrenChange.next(nodes);
     this.dataChange.next(this.dataChange.value);
   }
 
-  private _generateNode(item: string): LoadmoreNode {
+  private _generateNode(item: NodeItem): LoadmoreNode {
     if (this.nodeMap.has(item)) {
       return this.nodeMap.get(item)!;
     }
-    const result = new LoadmoreNode(item, this.dataMap.has(item));
+    console.log('dataMap Keys: ')
+    console.log([...this.dataMap.keys()])
+    console.log(item.name);
+    console.log(this.dataMap.has(item.id));
+    const result = new LoadmoreNode(item, this.dataMap.has(item.id));
     this.nodeMap.set(item, result);
     return result;
   }

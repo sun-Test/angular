@@ -2,7 +2,7 @@
     <!-- Leaf node -->
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
       <button mat-icon-button disabled></button>
-      {{node.item}}
+      <div (click)="onClickNode(node.item.id)">{{node.item.name}}</div>
     </mat-tree-node>
   
     <!-- expandable node -->
@@ -15,7 +15,7 @@
           {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
         </mat-icon>
       </button>
-      <a>{{node.item}}</a>
+      <div (click)="onClickNode(node.item.id)">{{node.item.name}}</div>
     </mat-tree-node>
   
     <mat-tree-node *matTreeNodeDef="let node; when: isLoadMore">
